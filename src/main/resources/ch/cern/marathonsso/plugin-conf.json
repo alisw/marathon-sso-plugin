@@ -1,0 +1,13 @@
+{
+  "plugins": {
+    "authorization": {
+      "plugin": "mesosphere.marathon.plugin.auth.Authorizer",
+      "implementation": "ch.cern.marathonsso.JavaAuthorizer"
+    },
+    "authentication": {
+      "plugin": "mesosphere.marathon.plugin.auth.Authenticator",
+      "implementation": "ch.cern.marathonsso.JavaAuthenticator"
+    }
+  }
+}
+

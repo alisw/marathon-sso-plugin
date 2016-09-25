@@ -52,6 +52,11 @@ public class JavaAuthorizer implements Authorizer {
     }
     private boolean isAuthorized(JavaIdentity principal, Action action, PathId path) {
         try {
+          // Direct access to the backend is always allowed, because in
+          // any case one could spoof the headers.
+          if (principal.isDirect())
+            return true;
+
           List<String> egroups = Arrays.asList(principal.getEgroups())
                                  .stream()
                                  .filter(e -> e.startsWith(VALID_GROUP_PREFIX))

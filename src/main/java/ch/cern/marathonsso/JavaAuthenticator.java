@@ -37,13 +37,22 @@ public class JavaAuthenticator implements Authenticator {
     private Identity doAuth(HttpRequest request) {
       try {
         Option<String> header = request.header(LOGIN_HEADER).headOption();
+        Option<String> groupHeader = request.header(GROUP_HEADER).headOption();
 
+        // In case we do not have neither the login header nor the
+        // group header it means marathon is being accessed directly
+        // from within the cluster, e.g. by traefik, so we always allow
+        // it given in any case one could spoof the connection.
+        if (!header.isDefined() && ! groupHeader.isDefined())
+        {
+          log.debug("Direct access to backend.");
+          return new JavaIdentity(null, null);
+        }
         String user = null;
         if (header.isDefined()) {
           user = header.get();
         }
         String[] egroups = {};
-        Option<String> groupHeader = request.header(GROUP_HEADER).headOption();
         if (groupHeader.isDefined()) {
           egroups = groupHeader.get().split(";");
         }

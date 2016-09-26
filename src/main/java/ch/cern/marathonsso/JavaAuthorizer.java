@@ -28,9 +28,15 @@ public class JavaAuthorizer implements Authorizer {
     public <Resource> boolean isAuthorized(Identity principal, AuthorizedAction<Resource> action, Resource resource) {
         if (!(principal instanceof JavaIdentity))
           return false;
+
         JavaIdentity jid = (JavaIdentity) principal;
-        if (jid.getName() == null)
-          return false;
+        // Direct access to the backend is always allowed, because in
+        // any case one could spoof the headers.
+        if (jid.isDirect())
+        {
+          log.info("Direct access to backend");
+          return true;
+        }
 
         // The authorization only happens o a path basis.
         if (resource instanceof AppDefinition)
@@ -52,11 +58,6 @@ public class JavaAuthorizer implements Authorizer {
     }
     private boolean isAuthorized(JavaIdentity principal, Action action, PathId path) {
         try {
-          // Direct access to the backend is always allowed, because in
-          // any case one could spoof the headers.
-          if (principal.isDirect())
-            return true;
-
           List<String> egroups = Arrays.asList(principal.getEgroups())
                                  .stream()
                                  .filter(e -> e.startsWith(VALID_GROUP_PREFIX))
